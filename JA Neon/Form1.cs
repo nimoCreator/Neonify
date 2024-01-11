@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -81,7 +82,7 @@ namespace JA_Neon
                         px++;
                         label_ProgressBar.Text = "Processing " + px / InputPicture.Width / InputPicture.Height * 100 + "%";
                         ProgressBar.Value = px / InputPicture.Width / InputPicture.Height * 100;
-                        OutputPicture.SetPixel(x, y, BumpSaturarionBitmap(InputPicture.GetPixel(x, y), NeonIntensity));
+                        OutputPicture.SetPixel(x, y, CppCalcPx(InputPicture.GetPixel(x, y), MaskBlur, MaskIntensity, NeonIntensity));
                         OutputPictureBox.Image = OutputPicture;
                     }
                 }
@@ -274,147 +275,12 @@ namespace JA_Neon
         #endregion ASSEMBLER
 
         #region C++
-        private Bitmap RunCpp(Bitmap input, int cores, int maskBlur, int maskIntensity, int neonIntensity)
+
+        private Color CppCalcPx(Color px, int maskBlur, int maskIntensity, int neonIntensity)
         {
-            if (input == null)
-            {
-                Console_AddLine("No input image provided!");
-                return null;
-            }
-
-            int width = input.Width;
-            int height = input.Height;
-
-            Bitmap blur = Generate_Blur(input, maskBlur);
-
-            Bitmap neonism = AdjustSaturation(input, neonIntensity);
-
-            Bitmap mask = CalculateMask(input, blur);
-
-            Bitmap result = AdjustWithMask(neonism, mask, maskIntensity);
-
-            // save all new bitmaps
-
-            input.Save("C://users/nimo/Desktop/Neon/input.bmp");
-            blur.Save("C://users/nimo/Desktop/Neon/blur.bmp");
-            neonism.Save("C://users/nimo/Desktop/Neon/neonism.bmp");
-            mask.Save("C://users/nimo/Desktop/Neon/mask.bmp");
-            result.Save("C://users/nimo/Desktop/Neon/final_result.bmp");
-
-            Console_AddLine("Saved all images!");
-
-
-            return result;
+            return Color.FromArgb(px.B, px.R, px.G);
         }
 
-        private Bitmap Generate_Blur(Bitmap input, int maskBlur)
-        {
-            int width = input.Width, height = input.Height;
-            Bitmap blur = new Bitmap(width, height);
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    Color blurredColor = CalculateBlurredColor(input, x, y, maskBlur);
-                    blur.SetPixel(x, y, blurredColor);
-                }
-            };
-
-            return blur;
-        }
-
-        private Color CalculateBlurredColor(Bitmap input, int x, int y, int maskBlur)
-        {
-            int width = input.Width;
-            int height = input.Height;
-
-            return Color.FromArgb(1, 2, 3);
-        }
-
-
-
-
-        private Bitmap AdjustSaturation(Bitmap input, int neonIntensity)
-        {
-            if (input == null)
-            {
-                Console_AddLine("No input image provided for saturation adjustment!");
-                return null;
-            }
-
-            int width = input.Width;
-            int height = input.Height;
-
-            Bitmap adjustedImage = new Bitmap(width, height);
-
-            float saturationFactor = neonIntensity / 100.0f; // Convert to a factor between 1.0 and 2.0
-
-            for (int x = 0; x < width; x++)
-            {
-                for (int y = 0; y < height; y++)
-                {
-                    adjustedImage.SetPixel(x, y, BumpSaturarionBitmap( input.GetPixel(x, y), neonIntensity));
-                }
-            }
-
-            return adjustedImage;
-        }
-
-        private Color BumpSaturarionBitmap(Color input, int neonIntensity)
-        {
-            return Color.FromArgb(input.R, input.B, input.G);
-        }
-
-        private Bitmap CalculateMask(Bitmap input, Bitmap blur)
-        {
-            int width = input.Width;
-            int height = input.Height;
-            Bitmap mask = new Bitmap(width, height);
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int difference = CalculateColorDifference(input.GetPixel(x, y), blur.GetPixel(x, y));
-
-                    mask.SetPixel(x, y, Color.FromArgb(difference, difference, difference));
-                }
-            }
-
-            return mask;
-        }
-
-        private int CalculateColorDifference(Color color1, Color color2)
-        {
-            return Math.Max(0,Math.Min(255, (Math.Abs(color1.R - color2.R) + Math.Abs(color1.G - color2.G) + Math.Abs(color1.B - color2.B))));
-        }
-
-        private Bitmap AdjustWithMask(Bitmap neonism, Bitmap mask, int maskIntensity)
-        {
-            int width = neonism.Width;
-            int height = neonism.Height;
-            Bitmap result = new Bitmap(width, height);
-
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    Color neonismColor = neonism.GetPixel(x, y);
-                    Color maskColor = mask.GetPixel(x, y);
-
-                    int amplifiedMaskIntensity = maskIntensity * maskColor.R / 255;
-
-                    int adjustedR = Math.Min(255, neonismColor.R + amplifiedMaskIntensity);
-                    int adjustedG = Math.Min(255, neonismColor.G + amplifiedMaskIntensity);
-                    int adjustedB = Math.Min(255, neonismColor.B + amplifiedMaskIntensity);
-
-                    result.SetPixel(x, y, Color.FromArgb(adjustedR, adjustedG, adjustedB));
-                }
-            }
-
-            return result;
-        }
         #endregion C++
     }
 }
