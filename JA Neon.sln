@@ -5,6 +5,12 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JA Neon", "JA Neon\JA Neon.csproj", "{F68A1D66-736E-4922-8D3E-0ECFE7CB7C8F}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90B79507-1B25-45E9-8927-03DB64F5AFA9}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Desktop\icon.ico = ..\..\Desktop\icon.ico
+		N:\MEGAsync\Uni\SEM5\JA\icon.png = N:\MEGAsync\Uni\SEM5\JA\icon.png
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

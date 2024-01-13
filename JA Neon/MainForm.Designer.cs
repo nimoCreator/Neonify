@@ -73,18 +73,26 @@ namespace JA_Neon
             this.Console = new System.Windows.Forms.TextBox();
             this.InputPictureBox = new System.Windows.Forms.PictureBox();
             this.OutputPictureBox = new System.Windows.Forms.PictureBox();
+            this.peeker_Hue = new System.Windows.Forms.Label();
+            this.label_Hue_r = new System.Windows.Forms.Label();
+            this.label_hue_l = new System.Windows.Forms.Label();
+            this.label_Hue = new System.Windows.Forms.Label();
+            this.slider_Hue = new System.Windows.Forms.TrackBar();
+            this.label_Hue_0 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.slider_cores)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.slider_MaskBlur)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.slider_NeonIntensity)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.slider_MaskIntensity)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.InputPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputPictureBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.slider_Hue)).BeginInit();
             this.SuspendLayout();
             // 
             // button_run
             // 
             this.button_run.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button_run.Location = new System.Drawing.Point(657, 614);
+            this.button_run.Location = new System.Drawing.Point(654, 648);
             this.button_run.Name = "button_run";
             this.button_run.Size = new System.Drawing.Size(75, 23);
             this.button_run.TabIndex = 0;
@@ -97,7 +105,7 @@ namespace JA_Neon
             this.checkbox_autorun.AutoSize = true;
             this.checkbox_autorun.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.checkbox_autorun.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.checkbox_autorun.Location = new System.Drawing.Point(738, 617);
+            this.checkbox_autorun.Location = new System.Drawing.Point(735, 651);
             this.checkbox_autorun.Name = "checkbox_autorun";
             this.checkbox_autorun.Size = new System.Drawing.Size(86, 18);
             this.checkbox_autorun.TabIndex = 3;
@@ -222,11 +230,12 @@ namespace JA_Neon
             this.slider_MaskBlur.LargeChange = 0;
             this.slider_MaskBlur.Location = new System.Drawing.Point(495, 444);
             this.slider_MaskBlur.Maximum = 200;
+            this.slider_MaskBlur.Minimum = 10;
             this.slider_MaskBlur.Name = "slider_MaskBlur";
             this.slider_MaskBlur.Size = new System.Drawing.Size(322, 45);
             this.slider_MaskBlur.TabIndex = 17;
             this.slider_MaskBlur.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.slider_MaskBlur.Value = 1;
+            this.slider_MaskBlur.Value = 15;
             this.slider_MaskBlur.ValueChanged += new System.EventHandler(this.Slider_MaskBlur_ValueChange);
             this.slider_MaskBlur.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Slider_MaskBlur_MouseUp);
             // 
@@ -246,7 +255,7 @@ namespace JA_Neon
             this.label_MaskBlur_0.Name = "label_MaskBlur_0";
             this.label_MaskBlur_0.Size = new System.Drawing.Size(24, 13);
             this.label_MaskBlur_0.TabIndex = 18;
-            this.label_MaskBlur_0.Text = "0px";
+            this.label_MaskBlur_0.Text = "1px";
             // 
             // label_MaskBlur
             // 
@@ -305,7 +314,7 @@ namespace JA_Neon
             this.peeker_MaskBlur.Name = "peeker_MaskBlur";
             this.peeker_MaskBlur.Size = new System.Drawing.Size(36, 13);
             this.peeker_MaskBlur.TabIndex = 25;
-            this.peeker_MaskBlur.Text = "1.0 px";
+            this.peeker_MaskBlur.Text = "1.5 px";
             // 
             // peeker_NeonIntensity
             // 
@@ -411,7 +420,7 @@ namespace JA_Neon
             // peeker_MaskIntensity
             // 
             this.peeker_MaskIntensity.AutoSize = true;
-            this.peeker_MaskIntensity.Location = new System.Drawing.Point(461, 523);
+            this.peeker_MaskIntensity.Location = new System.Drawing.Point(456, 521);
             this.peeker_MaskIntensity.Name = "peeker_MaskIntensity";
             this.peeker_MaskIntensity.Size = new System.Drawing.Size(36, 13);
             this.peeker_MaskIntensity.TabIndex = 101;
@@ -439,9 +448,11 @@ namespace JA_Neon
             // 
             // ProgressBar
             // 
-            this.ProgressBar.Location = new System.Drawing.Point(15, 614);
+            this.ProgressBar.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.ProgressBar.Location = new System.Drawing.Point(12, 648);
             this.ProgressBar.Name = "ProgressBar";
             this.ProgressBar.Size = new System.Drawing.Size(636, 23);
+            this.ProgressBar.Step = 1;
             this.ProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.ProgressBar.TabIndex = 104;
             // 
@@ -451,12 +462,13 @@ namespace JA_Neon
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label_ProgressBar.AutoSize = true;
-            this.label_ProgressBar.Location = new System.Drawing.Point(312, 618);
+            this.label_ProgressBar.BackColor = System.Drawing.Color.Transparent;
+            this.label_ProgressBar.Location = new System.Drawing.Point(658, 673);
             this.label_ProgressBar.Name = "label_ProgressBar";
             this.label_ProgressBar.Size = new System.Drawing.Size(49, 13);
             this.label_ProgressBar.TabIndex = 105;
             this.label_ProgressBar.Text = "waiting...";
-            this.label_ProgressBar.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label_ProgressBar.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // Console
             // 
@@ -464,13 +476,14 @@ namespace JA_Neon
             this.Console.Multiline = true;
             this.Console.Name = "Console";
             this.Console.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.Console.Size = new System.Drawing.Size(397, 112);
+            this.Console.Size = new System.Drawing.Size(397, 136);
             this.Console.TabIndex = 106;
             // 
             // InputPictureBox
             // 
             this.InputPictureBox.BackColor = System.Drawing.SystemColors.Control;
             this.InputPictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.InputPictureBox.InitialImage = global::JA_Neon.Properties.Resources.OIG;
             this.InputPictureBox.Location = new System.Drawing.Point(12, 12);
             this.InputPictureBox.Name = "InputPictureBox";
             this.InputPictureBox.Size = new System.Drawing.Size(400, 400);
@@ -491,11 +504,90 @@ namespace JA_Neon
             this.OutputPictureBox.TabStop = false;
             this.OutputPictureBox.Click += new System.EventHandler(this.outputImageClick);
             // 
+            // peeker_Hue
+            // 
+            this.peeker_Hue.AutoSize = true;
+            this.peeker_Hue.Location = new System.Drawing.Point(472, 619);
+            this.peeker_Hue.Name = "peeker_Hue";
+            this.peeker_Hue.Size = new System.Drawing.Size(17, 13);
+            this.peeker_Hue.TabIndex = 112;
+            this.peeker_Hue.Text = "0°";
+            this.peeker_Hue.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label_Hue_r
+            // 
+            this.label_Hue_r.AutoSize = true;
+            this.label_Hue_r.Location = new System.Drawing.Point(776, 619);
+            this.label_Hue_r.Name = "label_Hue_r";
+            this.label_Hue_r.Size = new System.Drawing.Size(29, 13);
+            this.label_Hue_r.TabIndex = 111;
+            this.label_Hue_r.Text = "360°";
+            // 
+            // label_hue_l
+            // 
+            this.label_hue_l.AutoSize = true;
+            this.label_hue_l.Location = new System.Drawing.Point(498, 618);
+            this.label_hue_l.Name = "label_hue_l";
+            this.label_hue_l.Size = new System.Drawing.Size(32, 13);
+            this.label_hue_l.TabIndex = 110;
+            this.label_hue_l.Text = "-360°";
+            // 
+            // label_Hue
+            // 
+            this.label_Hue.AutoSize = true;
+            this.label_Hue.Location = new System.Drawing.Point(432, 600);
+            this.label_Hue.Name = "label_Hue";
+            this.label_Hue.Size = new System.Drawing.Size(65, 13);
+            this.label_Hue.TabIndex = 109;
+            this.label_Hue.Text = "Hue Rotate:";
+            // 
+            // slider_Hue
+            // 
+            this.slider_Hue.AutoSize = false;
+            this.slider_Hue.LargeChange = 0;
+            this.slider_Hue.Location = new System.Drawing.Point(495, 597);
+            this.slider_Hue.Maximum = 100;
+            this.slider_Hue.Minimum = -100;
+            this.slider_Hue.Name = "slider_Hue";
+            this.slider_Hue.Size = new System.Drawing.Size(322, 45);
+            this.slider_Hue.TabIndex = 108;
+            this.slider_Hue.TickStyle = System.Windows.Forms.TickStyle.None;
+            this.slider_Hue.ValueChanged += new System.EventHandler(this.Slider_HueRotate_ValueChange);
+            this.slider_Hue.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Slider_HueRotate_MouseUp);
+            // 
+            // label_Hue_0
+            // 
+            this.label_Hue_0.AutoSize = true;
+            this.label_Hue_0.Location = new System.Drawing.Point(641, 619);
+            this.label_Hue_0.Name = "label_Hue_0";
+            this.label_Hue_0.Size = new System.Drawing.Size(17, 13);
+            this.label_Hue_0.TabIndex = 113;
+            this.label_Hue_0.Text = "0°";
+            // 
+            // button1
+            // 
+            this.button1.BackColor = System.Drawing.Color.CadetBlue;
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.button1.Location = new System.Drawing.Point(729, 415);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(88, 19);
+            this.button1.TabIndex = 114;
+            this.button1.Text = "Save All Layers";
+            this.button1.UseVisualStyleBackColor = false;
+            this.button1.Click += new System.EventHandler(this.button_SaveAllLayers);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(830, 656);
+            this.ClientSize = new System.Drawing.Size(830, 698);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.label_Hue_0);
+            this.Controls.Add(this.peeker_Hue);
+            this.Controls.Add(this.label_Hue_r);
+            this.Controls.Add(this.label_hue_l);
+            this.Controls.Add(this.label_Hue);
+            this.Controls.Add(this.slider_Hue);
             this.Controls.Add(this.Console);
             this.Controls.Add(this.label_ProgressBar);
             this.Controls.Add(this.ProgressBar);
@@ -545,6 +637,7 @@ namespace JA_Neon
             ((System.ComponentModel.ISupportInitialize)(this.slider_MaskIntensity)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.InputPictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.OutputPictureBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.slider_Hue)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -610,13 +703,27 @@ namespace JA_Neon
         private System.Windows.Forms.Label label_NeonIntensity_200;
         private System.Windows.Forms.Label peeker_NeonIntensity;
 
+        // hue shift
+
+        private System.Windows.Forms.Label label_Hue;
+        private System.Windows.Forms.TrackBar slider_Hue;
+        private System.Windows.Forms.Label label_hue_l;
+        private System.Windows.Forms.Label label_Hue_0;
+        private System.Windows.Forms.Label label_Hue_r;
+        private System.Windows.Forms.Label peeker_Hue;
+
+
         // run
 
         private System.Windows.Forms.Button button_run;
         private System.Windows.Forms.CheckBox checkbox_autorun;
+
         private System.Windows.Forms.Label reading_time;
+
         private System.Windows.Forms.ProgressBar ProgressBar;
         private System.Windows.Forms.Label label_ProgressBar;
+
         private System.Windows.Forms.TextBox Console;
+        private System.Windows.Forms.Button button1;
     }
 }
