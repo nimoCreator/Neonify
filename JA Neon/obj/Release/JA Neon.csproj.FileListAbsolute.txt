@@ -2,9 +2,9 @@ C:\Users\nimo\source\Neonify\JA Neon\bin\Release\JA Neon.exe.config
 C:\Users\nimo\source\Neonify\JA Neon\bin\Release\JA Neon.exe
 C:\Users\nimo\source\Neonify\JA Neon\bin\Release\JA Neon.pdb
 C:\Users\nimo\source\Neonify\JA Neon\obj\Release\JA Neon.csproj.AssemblyReference.cache
-C:\Users\nimo\source\Neonify\JA Neon\obj\Release\JA_Neon.MainForm.resources
 C:\Users\nimo\source\Neonify\JA Neon\obj\Release\JA_Neon.Properties.Resources.resources
 C:\Users\nimo\source\Neonify\JA Neon\obj\Release\JA Neon.csproj.GenerateResource.cache
 C:\Users\nimo\source\Neonify\JA Neon\obj\Release\JA Neon.csproj.CoreCompileInputs.cache
 C:\Users\nimo\source\Neonify\JA Neon\obj\Release\JA Neon.exe
 C:\Users\nimo\source\Neonify\JA Neon\obj\Release\JA Neon.pdb
+C:\Users\nimo\source\Neonify\JA Neon\obj\Release\JA_Neon.MainForm.resources

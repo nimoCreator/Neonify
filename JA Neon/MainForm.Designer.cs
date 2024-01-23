@@ -483,7 +483,6 @@ namespace JA_Neon
             // 
             this.InputPictureBox.BackColor = System.Drawing.SystemColors.Control;
             this.InputPictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.InputPictureBox.InitialImage = global::JA_Neon.Properties.Resources.OIG;
             this.InputPictureBox.Location = new System.Drawing.Point(12, 12);
             this.InputPictureBox.Name = "InputPictureBox";
             this.InputPictureBox.Size = new System.Drawing.Size(400, 400);
@@ -517,7 +516,7 @@ namespace JA_Neon
             // label_Hue_r
             // 
             this.label_Hue_r.AutoSize = true;
-            this.label_Hue_r.Location = new System.Drawing.Point(776, 619);
+            this.label_Hue_r.Location = new System.Drawing.Point(782, 619);
             this.label_Hue_r.Name = "label_Hue_r";
             this.label_Hue_r.Size = new System.Drawing.Size(29, 13);
             this.label_Hue_r.TabIndex = 111;
@@ -546,8 +545,8 @@ namespace JA_Neon
             this.slider_Hue.AutoSize = false;
             this.slider_Hue.LargeChange = 0;
             this.slider_Hue.Location = new System.Drawing.Point(495, 597);
-            this.slider_Hue.Maximum = 100;
-            this.slider_Hue.Minimum = -100;
+            this.slider_Hue.Maximum = 360;
+            this.slider_Hue.Minimum = -360;
             this.slider_Hue.Name = "slider_Hue";
             this.slider_Hue.Size = new System.Drawing.Size(322, 45);
             this.slider_Hue.TabIndex = 108;
@@ -558,7 +557,7 @@ namespace JA_Neon
             // label_Hue_0
             // 
             this.label_Hue_0.AutoSize = true;
-            this.label_Hue_0.Location = new System.Drawing.Point(641, 619);
+            this.label_Hue_0.Location = new System.Drawing.Point(650, 619);
             this.label_Hue_0.Name = "label_Hue_0";
             this.label_Hue_0.Size = new System.Drawing.Size(17, 13);
             this.label_Hue_0.TabIndex = 113;

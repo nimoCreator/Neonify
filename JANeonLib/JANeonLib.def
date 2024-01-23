@@ -1,0 +1,2 @@
+LIBRARY JANeonLib
+EXPORTS proc1

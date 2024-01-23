@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
+
+
 enum Library
 {
     Assembly, Cpp, Unknown
@@ -25,6 +27,7 @@ namespace JA_Neon
         private Library library = Library.Assembly;
         private int cores = 8;
         private bool rerun = false;
+        private bool lockInterface = false;
         private int MaskBlur = 15;
         private int MaskIntensity = 100;
         private int NeonIntensity = 75;
@@ -58,7 +61,10 @@ namespace JA_Neon
             slider_MaskBlur.Value = MaskBlur;
             slider_MaskIntensity.Value = MaskIntensity;
             slider_NeonIntensity.Value = NeonIntensity;
+            slider_Hue.Value = HueRotate;   
             select_Library.SelectedIndex = 1;
+            checkbox_autorun.Checked = rerun;
+            //checkbox_lockInterface.Checked = lockInterface;
 
             Console_AddLine("Welcome to Neonify application by nimo! (v0.8.0)");
             Console_AddLine("For more check nimoweb.ddns.net");
@@ -145,6 +151,7 @@ namespace JA_Neon
             catch (Exception ex)
             {
                 Console_AddLine($"An error occurred: {ex.Message}");
+                Console_AddLine($"Stack Trace: {ex.StackTrace}");
             }
         }
         private async void QuickRun()
@@ -158,12 +165,13 @@ namespace JA_Neon
 
             try
             {
-                if (library == Library.Assembly)
+/*                if (library == Library.Assembly)
                 {
                     UpdateProgressBar("Initializing Assembly...", 0);
                     OutputPicture = await Task.Run(() => QuickRunAssembly(InputPicture, cores, MaskBlur, MaskIntensity, NeonIntensity, HueRotate));
                 }
-                else if (library == Library.Cpp)
+                else */
+                if (library == Library.Cpp)
                 {
                     UpdateProgressBar("Initializing C++...", 0);
                     OutputPicture = await Task.Run(() => QuickRunCppCode(InputPicture, cores, MaskBlur, MaskIntensity, NeonIntensity, HueRotate));
@@ -188,6 +196,7 @@ namespace JA_Neon
             catch (Exception ex)
             {
                 Console_AddLine($"An error occurred: {ex.Message}");
+                Console_AddLine($"Stack Trace: {ex.StackTrace}");
             }
         }
         private void DetectCoresCount(object sender, EventArgs e)
@@ -218,6 +227,9 @@ namespace JA_Neon
 
                     SaveImage(InputPicture, folderPath, "Input.png");
                     SaveImage(OutputPicture, folderPath, "Output.png");
+
+                    if (Cleared == null || Neon == null || Blur == null || Mask == null) { return; }
+
                     SaveImage(Cleared, folderPath, "Cleared.png");
                     SaveImage(Neon, folderPath, "Neon.png");
                     SaveImage(Blur, folderPath, "Blur.png");
@@ -310,6 +322,7 @@ namespace JA_Neon
                 catch (Exception ex)
                 {
                     Console_AddLine($"Failed to save output image: {ex.Message}");
+                    Console_AddLine($"Stack Trace: {ex.StackTrace}");
                 }
             }
             else
@@ -346,7 +359,7 @@ namespace JA_Neon
         }
         private void Slider_HueRotate_ValueChange(object sender, EventArgs e)
         {
-            HueRotate = slider_NeonIntensity.Value;
+            HueRotate = slider_Hue.Value;
             peeker_Hue.Text = HueRotate.ToString() + "°";
         }
         #endregion Constant Updates
@@ -417,6 +430,10 @@ namespace JA_Neon
         {
             rerun = checkbox_autorun.Checked;
         }
+        private void CheckBox_LockInterface_ValueChanged(object sender, EventArgs e)
+        {
+            //lockInterface = checkbox_lockInterface.Checked;
+        }
         private void onchange()
         {
             if (this.rerun)
@@ -481,12 +498,63 @@ namespace JA_Neon
         #region ASSEMBLER
         private async Task<Bitmap> RunAssembly(Bitmap inputPicture, int cores, int maskBlur, int maskIntensity, int neonIntensity, int hueRotate)
         {
-            return inputPicture;
+            int width = inputPicture.Width, height = inputPicture.Height;
+            int[] vectorizedImage = new int[width * height * 3];
+            int progress = 0, todo = width * height, batchSize = 1000;
+
+            await Task.Run(() =>
+            {
+                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        int baseIndex = width * x + 3 * y;
+                        Color pixel = inputPicture.GetPixel(x, y);
+
+                        vectorizedImage[baseIndex] = pixel.R;
+                        vectorizedImage[baseIndex + 1] = pixel.G;
+                        vectorizedImage[baseIndex + 2] = pixel.B;
+                    }
+
+                    lock (lockObject)
+                    {
+                        if (!lockInterface && progress++ % batchSize == 0)
+                        {
+                            UpdateProgressBar("Linearizing", (double)progress / todo);
+                        }
+                    }
+                });
+            });
+
+            UpdateProgressBar("Running ASM", 0);
+            // int[] rgb;
+/*            int[] rgb = AsmInterop.NeonifyASM(vectorizedImage, width, height, maskBlur, maskIntensity, neonIntensity, hueRotate);*/
+            UpdateProgressBar("Running ASM", 1);
+
+            progress = 0;
+            await Task.Run(() =>
+            {
+                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        int baseIndex = width * x + 3 * y;
+                       /* OutputPicture.SetPixel(x, y, Color.FromArgb(rgb[baseIndex], rgb[baseIndex + 1], rgb[baseIndex + 2]));*/
+                    }
+
+                    lock (lockObject)
+                    {
+                        if (!lockInterface && progress++ % batchSize == 0)
+                        {
+                            UpdateProgressBar("Unlinearizing", (double)progress / todo);
+                        }
+                    }
+                });
+            });
+
+            return OutputPicture;
         }
-        private async Task<Bitmap> QuickRunAssembly(Bitmap inputPicture, int cores, int maskBlur, int maskIntensity, int neonIntensity, int hueRotate)
-        {
-            return inputPicture;
-        }
+
         #endregion ASSEMBLER
 
         #region C++
@@ -518,13 +586,13 @@ namespace JA_Neon
                 Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
                 {
                     for (int y = 0; y < height; y++)
-                    {
+                    { 
                         lock (lockObject)
                         {
                             inputPixels[x, y] = inputPicture.GetPixel(x, y);
                         }
 
-                        if (progress++ % batchSize == 0)
+                        if (!lockInterface && progress++ % batchSize == 0)
                         {
                             UpdateProgressBar("Initializing C++", (double)progress / todo);
                         }
@@ -550,7 +618,7 @@ namespace JA_Neon
                             Cleared.SetPixel(x, y, cleared[x, y]);
                         }
 
-                        if (progress++ % batchSize == 0)
+                        if (!lockInterface && progress++ % batchSize == 0)
                         {
                             int currentProgress = (int)((double)progress / todo * 100);
                             if (currentProgress != lastProgress)
@@ -585,7 +653,7 @@ namespace JA_Neon
                             Mask.SetPixel(x, y, maskPixels[x, y]);
                         }
 
-                        if (progress++ % batchSize == 0)
+                        if (!lockInterface && progress++ % batchSize == 0)
                         {
                             int currentProgress = (int)((double)progress / todo * 100);
                             if (currentProgress != lastProgress)
@@ -639,7 +707,7 @@ namespace JA_Neon
                             Mask.SetPixel(x, y, maskPixels[x, y]);
                         }
 
-                        if (progress++ % batchSize == 0)
+                        if (!lockInterface && progress++ % batchSize == 0)
                         {
                             int currentProgress = (int)((double)progress / todo * 100);
                             if (currentProgress != lastProgress)
@@ -661,9 +729,9 @@ namespace JA_Neon
             double w = 0;
             double radious = (double)maskBlur / 10;
 
-            for (int i = (int)((double)x - radious); i <= x + radious; i++)
+            for (int i = (int)((double)x - radious); i <= (int)(x + radious); i++)
             {
-                for (int j = (int)((double)y - radious); j <= y + radious; j++)
+                for(int j = (int)((double)y - radious); j <= (int)(y + radious); j++)
                 {
                     if (i >= 0 && i < pixels.GetLength(0) && j >= 0 && j < pixels.GetLength(1))
                     {
@@ -774,5 +842,7 @@ namespace JA_Neon
         }
 
         #endregion C++
+
+
     }
 }

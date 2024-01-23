@@ -1,0 +1,2 @@
+#define JANEONLIB_API __declspec(dllexport)
+#define JANEONLIB_API __declspec(dllimport)
