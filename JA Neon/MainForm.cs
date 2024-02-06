@@ -592,7 +592,7 @@ namespace JA_Neon
                 Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
                 {
                     for (int y = 0; y < height; y++)
-                    { 
+                    {
                         lock (lockObject)
                         {
                             inputPixels[x, y] = inputPicture.GetPixel(x, y);

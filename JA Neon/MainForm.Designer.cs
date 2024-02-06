@@ -147,7 +147,7 @@ namespace JA_Neon
             this.slider_cores.Size = new System.Drawing.Size(276, 45);
             this.slider_cores.TabIndex = 6;
             this.slider_cores.TickStyle = System.Windows.Forms.TickStyle.None;
-            this.slider_cores.Value = 16;
+            this.slider_cores.Value = 8;
             this.slider_cores.ValueChanged += new System.EventHandler(this.Slider_Cores_ValueChange);
             this.slider_cores.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Slider_Cores_MouseUp);
             // 
