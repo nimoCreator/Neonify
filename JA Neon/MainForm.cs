@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 
 enum Library
@@ -20,6 +21,9 @@ namespace JA_Neon
 {
     public partial class MainForm : Form
     {
+        [DllImport(@"C:\Neon\Neonify\x64\Release\JANeonLib.dll")]
+        static extern int proc1(int a);
+
         #region VARIABLES
 
         private readonly object lockObject = new object();

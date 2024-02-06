@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\nimo\source\Neonify\x64\Release\JANeonLib.dll</FullPath>
+      <FullPath>C:\Neon\Neonify\x64\Release\JANeonLib.dll</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
