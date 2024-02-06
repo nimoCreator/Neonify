@@ -61,6 +61,8 @@ namespace JA_Neon
         }
         private void Constructor(object sender, EventArgs e)
         {
+   /*         Console_AddLine();*/
+
             slider_cores.Value = cores;
             slider_MaskBlur.Value = MaskBlur;
             slider_MaskIntensity.Value = MaskIntensity;
