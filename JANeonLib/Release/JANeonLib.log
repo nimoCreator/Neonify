@@ -1,0 +1,8 @@
+﻿  Assembling JANeonLib.asm...
+JANeonLib.asm(1): error A2013: .MODEL must precede this directive
+JANeonLib.asm(5): error A2034: must be in segment block : MyProc1
+JANeonLib.asm(7): error A2034: must be in segment block
+JANeonLib.asm(8): error A2034: must be in segment block
+JANeonLib.asm(9): error A2034: must be in segment block
+JANeonLib.asm(11): fatal error A1010: unmatched block nesting : MyProc1
+P:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\BuildCustomizations\masm.targets(70,5): error MSB3721: The command "ml.exe /c /nologo /Zi /Fo"Release\JANeonLib.obj" /W3 /errorReport:prompt  /TaJANeonLib.asm" exited with code 1.

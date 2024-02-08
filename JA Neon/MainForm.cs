@@ -21,8 +21,12 @@ namespace JA_Neon
 {
     public partial class MainForm : Form
     {
-        [DllImport(@"C:\Neon\Neonify\x64\Release\JANeonLib.dll")]
-        static extern int proc1(int a);
+        [DllImport(@"C:\Neon\x64\Release\JANeonLib.dll")]
+        static extern int AsmMixPxComp(int px, int neon, int mask);
+        static extern int AsmMaskPxComp(int px, int neon, int mask);
+        static extern int SillyTest(int r, int g, int b);
+
+
 
         #region VARIABLES
 
@@ -61,13 +65,13 @@ namespace JA_Neon
         }
         private void Constructor(object sender, EventArgs e)
         {
-   /*         Console_AddLine();*/
+            /*         Console_AddLine();*/
 
             slider_cores.Value = cores;
             slider_MaskBlur.Value = MaskBlur;
             slider_MaskIntensity.Value = MaskIntensity;
             slider_NeonIntensity.Value = NeonIntensity;
-            slider_Hue.Value = HueRotate;   
+            slider_Hue.Value = HueRotate;
             select_Library.SelectedIndex = 1;
             checkbox_autorun.Checked = rerun;
             //checkbox_lockInterface.Checked = lockInterface;
@@ -171,12 +175,12 @@ namespace JA_Neon
 
             try
             {
-/*                if (library == Library.Assembly)
+                if (library == Library.Assembly)
                 {
                     UpdateProgressBar("Initializing Assembly...", 0);
                     OutputPicture = await Task.Run(() => QuickRunAssembly(InputPicture, cores, MaskBlur, MaskIntensity, NeonIntensity, HueRotate));
                 }
-                else */
+                else
                 if (library == Library.Cpp)
                 {
                     UpdateProgressBar("Initializing C++...", 0);
@@ -351,7 +355,7 @@ namespace JA_Neon
         {
             QuickRunAviable = false;
             MaskBlur = slider_MaskBlur.Value;
-            peeker_MaskBlur.Text = ((double)MaskBlur/10).ToString() + " px";
+            peeker_MaskBlur.Text = ((double)MaskBlur / 10).ToString() + " px";
         }
         private void Slider_MaskIntensity_ValueChange(object sender, EventArgs e)
         {
@@ -389,7 +393,7 @@ namespace JA_Neon
         {
             MaskIntensity = slider_MaskIntensity.Value;
             Console_AddLine("MaskIntensity set to: " + MaskIntensity + " %");
-            
+
             onchange();
         }
         private void Slider_NeonIntensity_MouseUp(object sender, MouseEventArgs e)
@@ -425,7 +429,7 @@ namespace JA_Neon
                 Console_AddLine("Unknown Library!");
                 return;
             }
-            if(LibSelected)
+            if (LibSelected)
                 Console_AddLine("\nLibrary set to: " + library);
             else
                 LibSelected = true;
@@ -445,7 +449,8 @@ namespace JA_Neon
             if (this.rerun)
             {
                 this.Run(null, null);
-            } else if (QuickRunAviable)
+            }
+            else if (QuickRunAviable)
             {
                 this.QuickRun();
             }
@@ -457,7 +462,7 @@ namespace JA_Neon
         {
             String s = "";
 
-            if(ms > 60000)
+            if (ms > 60000)
             {
                 s += (ms / 60000) + "m ";
             }
@@ -504,9 +509,79 @@ namespace JA_Neon
         #region ASSEMBLER
         private async Task<Bitmap> RunAssembly(Bitmap inputPicture, int cores, int maskBlur, int maskIntensity, int neonIntensity, int hueRotate)
         {
-            int width = inputPicture.Width, height = inputPicture.Height;
-            int[] vectorizedImage = new int[width * height * 3];
-            int progress = 0, todo = width * height, batchSize = 1000;
+            UpdateProgressBar("Initializing C++", 0);
+
+            int width = inputPicture.Width;
+            int height = inputPicture.Height;
+
+            OutputPicture = new Bitmap(width, height);
+            Cleared = new Bitmap(width, height);
+            Blur = new Bitmap(width, height);
+            Mask = new Bitmap(width, height);
+            Neon = new Bitmap(width, height);
+
+            inputPixels = new Color[width, height];
+            cleared = new Color[width, height];
+            blurPixels = new Color[width, height];
+            neonPixels = new Color[width, height];
+            maskPixels = new Color[width, height];
+
+            int progress = 0, todo = (width * height), batchSize = 1000, lastProgress = 0;
+
+
+            UpdateProgressBar("Initializing C++", 0);
+            await Task.Run(() =>
+            {
+                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        lock (lockObject)
+                        {
+                            inputPixels[x, y] = inputPicture.GetPixel(x, y);
+                        }
+
+                        if (!lockInterface && progress++ % batchSize == 0)
+                        {
+                            UpdateProgressBar("Initializing C++", (double)progress / todo);
+                        }
+                    }
+                });
+            });
+            UpdateProgressBar("Initializing C++", 1);
+
+            progress = 0;
+
+            double madkBlurSQRT = Math.Sqrt(maskBlur * 10);
+
+            UpdateProgressBar("Preparing Image", 0);
+            await Task.Run(() =>
+            {
+                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        lock (lockObject)
+                        {
+                            cleared[x, y] = CppBlurPx(inputPixels, x, y, madkBlurSQRT);
+                            Cleared.SetPixel(x, y, cleared[x, y]);
+                        }
+
+                        if (!lockInterface && progress++ % batchSize == 0)
+                        {
+                            int currentProgress = (int)((double)progress / todo * 100);
+                            if (currentProgress != lastProgress)
+                            {
+                                lastProgress = currentProgress;
+                                UpdateProgressBar("Preparing Image", (double)progress / todo);
+                            }
+                        }
+                    }
+                });
+            });
+            UpdateProgressBar("Preparing Image", 1);
+
+            progress = 0;
 
             await Task.Run(() =>
             {
@@ -514,51 +589,121 @@ namespace JA_Neon
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        int baseIndex = width * x + 3 * y;
-                        Color pixel = inputPicture.GetPixel(x, y);
+                        lock (lockObject)
+                        {
+                            neonPixels[x, y] = CppNeonPx(cleared[x, y], neonIntensity, hueRotate);
+                            blurPixels[x, y] = CppBlurPx(cleared, x, y, maskBlur);
+                            maskPixels[x, y] = AsmMaskPx(cleared[x, y], blurPixels[x, y], maskIntensity);
 
-                        vectorizedImage[baseIndex] = pixel.R;
-                        vectorizedImage[baseIndex + 1] = pixel.G;
-                        vectorizedImage[baseIndex + 2] = pixel.B;
-                    }
+                            OutputPicture.SetPixel(x, y, AssemblyMixPx(cleared[x, y], neonPixels[x, y], maskPixels[x, y]));
 
-                    lock (lockObject)
-                    {
+                            Neon.SetPixel(x, y, neonPixels[x, y]);
+                            Blur.SetPixel(x, y, blurPixels[x, y]);
+                            Mask.SetPixel(x, y, maskPixels[x, y]);
+                        }
+
                         if (!lockInterface && progress++ % batchSize == 0)
                         {
-                            UpdateProgressBar("Linearizing", (double)progress / todo);
+                            int currentProgress = (int)((double)progress / todo * 100);
+                            if (currentProgress != lastProgress)
+                            {
+                                lastProgress = currentProgress;
+                                UpdateProgressBar("Processing Image", (double)progress / todo);
+                            }
                         }
                     }
                 });
             });
 
-            UpdateProgressBar("Running ASM", 0);
-            // int[] rgb;
-/*            int[] rgb = AsmInterop.NeonifyASM(vectorizedImage, width, height, maskBlur, maskIntensity, neonIntensity, hueRotate);*/
-            UpdateProgressBar("Running ASM", 1);
+
+            QuickRunAviable = true;
+
+            return OutputPicture;
+        }
+
+        private async Task<Bitmap> QuickRunAssembly(Bitmap inputPicture, int cores, int maskBlur, int maskIntensity, int neonIntensity, int hueRotate)
+        {
+            UpdateProgressBar("Initializing C++", 0);
+
+            int width = inputPicture.Width;
+            int height = inputPicture.Height;
+
+            Bitmap OutputPicture = new Bitmap(width, height);
+            Bitmap Blur = new Bitmap(width, height);
+            Bitmap Mask = new Bitmap(width, height);
+            Bitmap Neon = new Bitmap(width, height);
+
+            int progress = 0, todo = (width * height), batchSize = 1000, lastProgress = 0;
+
+            double madkBlurSQRT = Math.Sqrt(maskBlur * 10);
 
             progress = 0;
+
             await Task.Run(() =>
             {
                 Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        int baseIndex = width * x + 3 * y;
-                       /* OutputPicture.SetPixel(x, y, Color.FromArgb(rgb[baseIndex], rgb[baseIndex + 1], rgb[baseIndex + 2]));*/
-                    }
+                        lock (lockObject)
+                        {
+                            neonPixels[x, y] = CppNeonPx(cleared[x, y], neonIntensity, hueRotate);
+                            maskPixels[x, y] = AsmMaskPx(cleared[x, y], blurPixels[x, y], maskIntensity);
 
-                    lock (lockObject)
-                    {
+                            OutputPicture.SetPixel(x, y, AssemblyMixPx(cleared[x, y], neonPixels[x, y], maskPixels[x, y]));
+
+                            Neon.SetPixel(x, y, neonPixels[x, y]);
+                            Mask.SetPixel(x, y, maskPixels[x, y]);
+                        }
+
                         if (!lockInterface && progress++ % batchSize == 0)
                         {
-                            UpdateProgressBar("Unlinearizing", (double)progress / todo);
+                            int currentProgress = (int)((double)progress / todo * 100);
+                            if (currentProgress != lastProgress)
+                            {
+                                lastProgress = currentProgress;
+                                UpdateProgressBar("Refreshing the Image", (double)progress / todo);
+                            }
                         }
                     }
                 });
             });
 
             return OutputPicture;
+        }
+
+        private Color AssemblyMixPx(Color px, Color neon, Color mask)
+        {
+            int[] rgb = new int[3];
+
+            int[] values = { px.R, neon.R, mask.R, px.G, neon.G, mask.G, px.B, neon.B, mask.B };
+
+            lock (lockObject)
+            {
+                rgb[0] = AsmMixPxComp(values[0], values[1], values[2]);
+            }
+
+            lock (lockObject)
+            {
+                rgb[1] = AsmMixPxComp(values[3], values[4], values[5]);
+            }
+
+            lock (lockObject)
+            {
+                rgb[2] = AsmMixPxComp(values[6], values[7], values[8]);
+            }
+
+
+            return Color.FromArgb(rgb[0], rgb[1], rgb[2]);
+        }
+
+        private Color AsmMaskPx(Color px, Color blur, int maskIntensity)
+        {
+            return Color.FromArgb(
+                MinMax(0, (Math.Abs(px.R - blur.R) * (maskIntensity) - 10) / 20, 255),
+                MinMax(0, (Math.Abs(px.R - blur.R) * (maskIntensity) - 10) / 20, 255),
+                MinMax(0, (Math.Abs(px.R - blur.R) * (maskIntensity) - 10) / 20, 255)
+                );
         }
 
         #endregion ASSEMBLER
@@ -737,7 +882,7 @@ namespace JA_Neon
 
             for (int i = (int)((double)x - radious); i <= (int)(x + radious); i++)
             {
-                for(int j = (int)((double)y - radious); j <= (int)(y + radious); j++)
+                for (int j = (int)((double)y - radious); j <= (int)(y + radious); j++)
                 {
                     if (i >= 0 && i < pixels.GetLength(0) && j >= 0 && j < pixels.GetLength(1))
                     {
@@ -793,7 +938,7 @@ namespace JA_Neon
 
         private Color FromHVS(float H, float S, float V)
         {
-    
+
             float hue = H / 360.0f;
 
             if (S == 0)
@@ -820,7 +965,7 @@ namespace JA_Neon
         }
         private Color FromHVS_neon(float H, float S, float V, int neonIntensity, int hueRotate)
         {
-            float hue = (H + hueRotate + 360)%360 / 360.0f;
+            float hue = (H + hueRotate + 360) % 360 / 360.0f;
 
             S = Math.Min(S * (neonIntensity) / 100, 1);
 

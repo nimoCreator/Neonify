@@ -1,2 +1,4 @@
 LIBRARY JANeonLib
-EXPORTS proc1
+EXPORTS
+    AsmMixPxComp
+    AsmMaskPxComp
