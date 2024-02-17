@@ -1,2 +1,3 @@
 ﻿  Assembling JANeonLib.asm...
-  JANeonLib.vcxproj -> C:\Neon\x64\Debug\JANeonLib.dll
+     Creating library C:\Neon\Neonify\x64\Debug\JANeonLib.lib and object C:\Neon\Neonify\x64\Debug\JANeonLib.exp
+  JANeonLib.vcxproj -> C:\Neon\Neonify\x64\Debug\JANeonLib.dll

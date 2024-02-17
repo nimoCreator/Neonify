@@ -8,3 +8,13 @@ C:\Neon\JA Neon\obj\x64\Release\JA Neon.csproj.GenerateResource.cache
 C:\Neon\JA Neon\obj\x64\Release\JA Neon.csproj.CoreCompileInputs.cache
 C:\Neon\JA Neon\obj\x64\Release\JA Neon.exe
 C:\Neon\JA Neon\obj\x64\Release\JA Neon.pdb
+C:\Neon\Neonify\JA Neon\bin\x64\Release\JA Neon.exe.config
+C:\Neon\Neonify\JA Neon\bin\x64\Release\JA Neon.exe
+C:\Neon\Neonify\JA Neon\bin\x64\Release\JA Neon.pdb
+C:\Neon\Neonify\JA Neon\obj\x64\Release\JA Neon.csproj.AssemblyReference.cache
+C:\Neon\Neonify\JA Neon\obj\x64\Release\JA_Neon.MainForm.resources
+C:\Neon\Neonify\JA Neon\obj\x64\Release\JA_Neon.Properties.Resources.resources
+C:\Neon\Neonify\JA Neon\obj\x64\Release\JA Neon.csproj.GenerateResource.cache
+C:\Neon\Neonify\JA Neon\obj\x64\Release\JA Neon.csproj.CoreCompileInputs.cache
+C:\Neon\Neonify\JA Neon\obj\x64\Release\JA Neon.exe
+C:\Neon\Neonify\JA Neon\obj\x64\Release\JA Neon.pdb

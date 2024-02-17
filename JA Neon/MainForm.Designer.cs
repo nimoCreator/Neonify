@@ -70,7 +70,7 @@ namespace JA_Neon
             this.label_Cores_16 = new System.Windows.Forms.Label();
             this.ProgressBar = new System.Windows.Forms.ProgressBar();
             this.label_ProgressBar = new System.Windows.Forms.Label();
-            this.Console = new System.Windows.Forms.TextBox();
+            this.ConsoleTextField = new System.Windows.Forms.TextBox();
             this.InputPictureBox = new System.Windows.Forms.PictureBox();
             this.OutputPictureBox = new System.Windows.Forms.PictureBox();
             this.peeker_Hue = new System.Windows.Forms.Label();
@@ -470,14 +470,14 @@ namespace JA_Neon
             this.label_ProgressBar.Text = "waiting...";
             this.label_ProgressBar.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // Console
+            // ConsoleTextField
             // 
-            this.Console.Location = new System.Drawing.Point(15, 496);
-            this.Console.Multiline = true;
-            this.Console.Name = "Console";
-            this.Console.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.Console.Size = new System.Drawing.Size(397, 136);
-            this.Console.TabIndex = 106;
+            this.ConsoleTextField.Location = new System.Drawing.Point(15, 496);
+            this.ConsoleTextField.Multiline = true;
+            this.ConsoleTextField.Name = "ConsoleTextField";
+            this.ConsoleTextField.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.ConsoleTextField.Size = new System.Drawing.Size(397, 136);
+            this.ConsoleTextField.TabIndex = 106;
             // 
             // InputPictureBox
             // 
@@ -587,7 +587,7 @@ namespace JA_Neon
             this.Controls.Add(this.label_hue_l);
             this.Controls.Add(this.label_Hue);
             this.Controls.Add(this.slider_Hue);
-            this.Controls.Add(this.Console);
+            this.Controls.Add(this.ConsoleTextField);
             this.Controls.Add(this.label_ProgressBar);
             this.Controls.Add(this.ProgressBar);
             this.Controls.Add(this.label_Cores_16);
@@ -722,7 +722,7 @@ namespace JA_Neon
         private System.Windows.Forms.ProgressBar ProgressBar;
         private System.Windows.Forms.Label label_ProgressBar;
 
-        private System.Windows.Forms.TextBox Console;
+        private System.Windows.Forms.TextBox ConsoleTextField;
         private System.Windows.Forms.Button button1;
     }
 }

@@ -6,4 +6,7 @@
   <ItemGroup>
     <None Include="JANeonLib.def" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="emerytura.txt" />
+  </ItemGroup>
 </Project>

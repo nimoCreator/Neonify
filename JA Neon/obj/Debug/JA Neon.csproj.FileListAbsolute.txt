@@ -18,3 +18,13 @@ C:\Users\nimo\source\Neonify\JA Neon\obj\Debug\JA Neon.csproj.GenerateResource.c
 C:\Users\nimo\source\Neonify\JA Neon\obj\Debug\JA Neon.csproj.CoreCompileInputs.cache
 C:\Users\nimo\source\Neonify\JA Neon\obj\Debug\JA Neon.exe
 C:\Users\nimo\source\Neonify\JA Neon\obj\Debug\JA Neon.pdb
+C:\Neon\Neonify\JA Neon\bin\Debug\JA Neon.exe.config
+C:\Neon\Neonify\JA Neon\bin\Debug\JA Neon.exe
+C:\Neon\Neonify\JA Neon\bin\Debug\JA Neon.pdb
+C:\Neon\Neonify\JA Neon\obj\Debug\JA Neon.csproj.AssemblyReference.cache
+C:\Neon\Neonify\JA Neon\obj\Debug\JA_Neon.MainForm.resources
+C:\Neon\Neonify\JA Neon\obj\Debug\JA_Neon.Properties.Resources.resources
+C:\Neon\Neonify\JA Neon\obj\Debug\JA Neon.csproj.GenerateResource.cache
+C:\Neon\Neonify\JA Neon\obj\Debug\JA Neon.csproj.CoreCompileInputs.cache
+C:\Neon\Neonify\JA Neon\obj\Debug\JA Neon.exe
+C:\Neon\Neonify\JA Neon\obj\Debug\JA Neon.pdb
