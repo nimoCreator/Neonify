@@ -22,12 +22,11 @@ namespace JA_Neon
 {
     public partial class MainForm : Form
     {
-        [DllImport(@"C:\Neon\Neonify\x64\Debug\JANeonLib.dll")]
-        public static extern void AsmAdd(ref int[] a, ref int[] b, ref int[] result);
+        [DllImport(@"C:\Neon\x64\Release\JANeonLib.dll")]
+        public static extern void AsmAdd(int[] a, int[] b, int[] result, int n);
 
-        /*     static extern int AsmMixPxComp(int px, int neon, int mask);
-               static extern int AsmMaskPxComp(int px, int neon, int mask);
-               static extern int SillyTest(int r, int g, int b);*/
+        [DllImport(@"C:\Neon\x64\Release\JANeonLib.dll")]
+        public static extern void AsmAddQuatro(int[] a, int[] b, int[] result);
 
 
 
@@ -514,185 +513,156 @@ namespace JA_Neon
         #region ASSEMBLER
         private async Task<Bitmap> RunAssembly(Bitmap inputPicture, int cores, int maskBlur, int maskIntensity, int neonIntensity, int hueRotate)
         {
-            try
+            UpdateProgressBar("Initializing Assembly", 0);
+
+            int width = inputPicture.Width;
+            int height = inputPicture.Height;
+
+            OutputPicture = new Bitmap(width, height);
+            Cleared = new Bitmap(width, height);
+            Blur = new Bitmap(width, height);
+            Mask = new Bitmap(width, height);
+            Neon = new Bitmap(width, height);
+
+            inputPixels = new Color[width, height];
+            cleared = new Color[width, height];
+            blurPixels = new Color[width, height];
+            neonPixels = new Color[width, height];
+            maskPixels = new Color[width, height];
+
+            int linearSize = width * height * 3;
+            linearSize += 4 - linearSize % 4;
+
+            int[] Toned = new int[linearSize];
+            int[] Bumped = new int[linearSize];
+            int[] Final = new int[linearSize];
+
+            int progress = 0, todo = (width * height), batchSize = 1000, lastProgress = 0;
+
+
+            UpdateProgressBar("Initializing Assembly", 0);
+
+
+            Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
             {
-                UpdateProgressBar("Initializing Assembly", 0);
-
-                int width = inputPicture.Width;
-                int height = inputPicture.Height;
-
-                OutputPicture = new Bitmap(width, height);
-                Cleared = new Bitmap(width, height);
-                Blur = new Bitmap(width, height);
-                Mask = new Bitmap(width, height);
-                Neon = new Bitmap(width, height);
-
-                inputPixels = new Color[width, height];
-                cleared = new Color[width, height];
-                blurPixels = new Color[width, height];
-                neonPixels = new Color[width, height];
-                maskPixels = new Color[width, height];
-
-                int[] Toned = new int[width * height * 3];
-                int[] Bumped = new int[width * height * 3];
-                int[] Final = new int[width * height * 3];
-
-                int progress = 0, todo = (width * height), batchSize = 1000, lastProgress = 0;
-
-
-                UpdateProgressBar("Initializing Assembly", 0);
-
-                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                for (int y = 0; y < height; y++)
                 {
-                    for (int y = 0; y < height; y++)
+                    lock (lockObject)
                     {
-                        lock (lockObject)
-                        {
-                            inputPixels[x, y] = inputPicture.GetPixel(x, y);
-                        }
-
-                        if (!lockInterface && progress++ % batchSize == 0)
-                        {
-                            UpdateProgressBar("Initializing Assembly", (double)progress / todo);
-                        }
+                        inputPixels[x, y] = inputPicture.GetPixel(x, y);
                     }
-                });
 
-                UpdateProgressBar("Initializing Assembly", 1);
-
-                progress = 0;
-
-                double madkBlurSQRT = Math.Sqrt(maskBlur * 10);
-
-                UpdateProgressBar("Preparing Image", 0);
-
-                Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
-                {
-                try
-                {
-                    for (int y = 0; y < height; y++)
+                    if (!lockInterface && progress++ % batchSize == 0)
                     {
-                        lock (lockObject)
-                        {
-                            cleared[x, y] = CppBlurPx(inputPixels, x, y, madkBlurSQRT);
-                            Cleared.SetPixel(x, y, cleared[x, y]);
-                        }
+                        UpdateProgressBar("Initializing Assembly", (double)progress / todo);
+                    }
+                }
+            });
 
-                        if (!lockInterface && progress++ % batchSize == 0)
+            UpdateProgressBar("Initializing Assembly", 1);
+
+            progress = 0;
+
+            double madkBlurSQRT = Math.Sqrt(maskBlur * 10);
+
+            UpdateProgressBar("Preparing Image", 0);
+
+            Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    cleared[x, y] = CppBlurPx(inputPixels, x, y, madkBlurSQRT);
+                    Cleared.SetPixel(x, y, cleared[x, y]);
+
+                    if (!lockInterface && progress++ % batchSize == 0)
+                    {
+                        int currentProgress = (int)((double)progress / todo * 100);
+                        if (currentProgress != lastProgress)
                         {
-                            int currentProgress = (int)((double)progress / todo * 100);
-                            if (currentProgress != lastProgress)
-                            {
-                                lastProgress = currentProgress;
-                                UpdateProgressBar("Preparing Image", (double)progress / todo);
-                            }
+                            lastProgress = currentProgress;
+                            UpdateProgressBar("Preparing Image", (double)progress / todo);
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console_AddLine(ex.Message);
-                }
-                });
-                UpdateProgressBar("Preparing Image", 1);
+            });
 
-                progress = 0;
+            UpdateProgressBar("Preparing Image", 1);
+
+            progress = 0;
                 
-                    //Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
-                for(int x = 0; x < width; x++)    
-                {
-                            for (int y = 0; y < height; y++)
-                            {
-                                lock (lockObject)
-                                {
-                                    neonPixels[x, y] = CppNeonPx(cleared[x, y], neonIntensity, hueRotate);
-                                    blurPixels[x, y] = CppBlurPx(cleared, x, y, maskBlur);
-                                    maskPixels[x, y] = CppMaskPx(cleared[x, y], blurPixels[x, y], maskIntensity);
-
-                                    Toned[y * width * 3 + x * 3] = cleared[x, y].R * (255 - maskPixels[x, y].R) / 255;
-                                    Toned[y * width * 3 + x * 3 + 1] = cleared[x, y].G * (255 - maskPixels[x, y].G) / 255;
-                                    Toned[y * width * 3 + x * 3 + 2] = cleared[x, y].B * (255 - maskPixels[x, y].B) / 255;
-
-                                    Bumped[y * width * 3 + x * 3] = neonPixels[x, y].R * (maskPixels[x, y].R) / 255;
-                                    Bumped[y * width * 3 + x * 3 + 1] = neonPixels[x, y].G * (maskPixels[x, y].G) / 255;
-                                    Bumped[y * width * 3 + x * 3 + 2] = neonPixels[x, y].B * (maskPixels[x, y].B) / 255;
-
-                                    Neon.SetPixel(x, y, neonPixels[x, y]);
-                                    Blur.SetPixel(x, y, blurPixels[x, y]);
-                                    Mask.SetPixel(x, y, maskPixels[x, y]);
-                                }
-
-                                if (!lockInterface && progress++ % batchSize == 0)
-                                {
-                                    int currentProgress = (int)((double)progress / todo * 100);
-                                    if (currentProgress != lastProgress)
-                                    {
-                                        lastProgress = currentProgress;
-                                        UpdateProgressBar("Processing Image", (double)progress / todo);
-                                    }
-                                }
-                            }
-                        
-                };
-
-
-                AsmAdd(ref Toned, ref Bumped, ref Final);
-
-                    /*             Parallel.For(0, width * height * 3, new ParallelOptions { MaxDegreeOfParallelism = cores }, i =>
-                                 {
-                                     Final[i] = Toned[i] + Bumped[i];
-                                 });*/
-                
-                    // Finaltask.Wait();  
-
-                    // Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
-                    for(int x = 0; x < width; x++)
-                    {
+            Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+            {
                         for (int y = 0; y < height; y++)
                         {
                             lock (lockObject)
                             {
-                                OutputPicture.SetPixel(x, y, Color.FromArgb(
-                                Final[y * width * 3 + x * 3],
-                                Final[y * width * 3 + x * 3 + 1],
-                                Final[y * width * 3 + x * 3 + 2]
-                                ));
+                                neonPixels[x, y] = CppNeonPx(cleared[x, y], neonIntensity, hueRotate);
+                                blurPixels[x, y] = CppBlurPx(cleared, x, y, maskBlur);
+                                maskPixels[x, y] = CppMaskPx(cleared[x, y], blurPixels[x, y], maskIntensity);
+
+                                Toned[y * width * 3 + x * 3] = cleared[x, y].R * (255 - maskPixels[x, y].R) / 255;
+                                Toned[y * width * 3 + x * 3 + 1] = cleared[x, y].G * (255 - maskPixels[x, y].G) / 255;
+                                Toned[y * width * 3 + x * 3 + 2] = cleared[x, y].B * (255 - maskPixels[x, y].B) / 255;
+
+                                Bumped[y * width * 3 + x * 3] = neonPixels[x, y].R * (maskPixels[x, y].R) / 255;
+                                Bumped[y * width * 3 + x * 3 + 1] = neonPixels[x, y].G * (maskPixels[x, y].G) / 255;
+                                Bumped[y * width * 3 + x * 3 + 2] = neonPixels[x, y].B * (maskPixels[x, y].B) / 255;
+
+                                Neon.SetPixel(x, y, neonPixels[x, y]);
+                                Blur.SetPixel(x, y, blurPixels[x, y]);
+                                Mask.SetPixel(x, y, maskPixels[x, y]);
                             }
-                            
-                            if (!lockInterface && progress++ % batchSize == 0)
-                            {
-                                int currentProgress = (int)((double)progress / todo * 100);
-                                if (currentProgress != lastProgress)
-                                {
-                                    lastProgress = currentProgress;
-                                    UpdateProgressBar("Rendering from Asembly", (double)progress / todo);
-                                }
-                            }
-                            
-                        }
-                    };
 
-
-                QuickRunAviable = true;
-
-                lock (lockObject)
+                if (!lockInterface && progress++ % batchSize == 0)
                 {
-                    return OutputPicture;
+                    int currentProgress = (int)((double)progress / todo * 100);
+                    if (currentProgress != lastProgress)
+                    {
+                        lastProgress = currentProgress;
+                        UpdateProgressBar("Processing Image", (double)progress / todo);
+                    }
                 }
-            } 
-            catch (Exception ex)
+            }
+                        
+            });
+
+            AsmAdd(Toned, Bumped, Final, linearSize/4);
+
+            /* for(int i = 0; i < width * height * 3; i++)
             {
-                Console.Write(ex.Message);
-                //Console_AddLine(ex.Message);
-                lock (lockObject)
+                int[] a = { Toned[MinMax(0, i, width * height * 3 - 1)], Toned[MinMax(0, i + 1, width * height * 3 - 1)], Toned[MinMax(0, i + 2, width * height * 3 - 1)], Toned[MinMax(0, i + 3, width * height * 3 - 1)] }, 
+                    b = { Bumped[MinMax(0, i, width * height * 3 - 1)], Bumped[MinMax(0, i + 1, width * height * 3 - 1)], Bumped[MinMax(0, i + 2, width * height * 3 - 1)], Bumped[MinMax(0, i + 3, width * height * 3 - 1)] },  
+                    c = { 0, 0, 0, 0};
+                AsmAddQuatro(a, b, c);
+                Final[MinMax(0, i, width * height * 3 - 1)] = c[0];
+                Final[MinMax(0, i + 1, width * height * 3 - 1)] = c[1];
+                Final[MinMax(0, i + 2, width * height * 3 - 1)] = c[2];
+                Final[MinMax(0, i + 3, width * height * 3 - 1)] = c[3];
+            }*/
+
+            Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+            {
+                for (int y = 0; y < height; y++)
                 {
-                    return OutputPicture;
+                        OutputPicture.SetPixel(x, y, Color.FromArgb(
+                            Final[y * width * 3 + x * 3],
+                            Final[y * width * 3 + x * 3 + 1],
+                            Final[y * width * 3 + x * 3 + 2]
+                            ));
                 }
+            });
+
+            QuickRunAviable = true;
+
+            lock (lockObject)
+            {
+                return OutputPicture;
             }
         }
 
         private async Task<Bitmap> QuickRunAssembly(Bitmap inputPicture, int cores, int maskBlur, int maskIntensity, int neonIntensity, int hueRotate)
         {
+            return InputPicture;
             try
             {
 
@@ -716,78 +686,64 @@ namespace JA_Neon
 
                 progress = 0;
 
-                await Task.Run(() =>
+                for (int x = 0; x < width; x++)
                 {
-                    Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                    for (int y = 0; y < height; y++)
                     {
-                        for (int y = 0; y < height; y++)
+                        lock (lockObject)
                         {
-                            lock (lockObject)
+                            neonPixels[x, y] = CppNeonPx(cleared[x, y], neonIntensity, hueRotate);
+                            maskPixels[x, y] = CppMaskPx(cleared[x, y], blurPixels[x, y], maskIntensity);
+
+                            Toned[y * width * 3 + x * 3] = cleared[x, y].R * (255 - maskPixels[x, y].R) / 255;
+                            Toned[y * width * 3 + x * 3 + 1] = cleared[x, y].G * (255 - maskPixels[x, y].G) / 255;
+                            Toned[y * width * 3 + x * 3 + 2] = cleared[x, y].B * (255 - maskPixels[x, y].B) / 255;
+
+                            Bumped[y * width * 3 + x * 3] = neonPixels[x, y].R * (maskPixels[x, y].R) / 255;
+                            Bumped[y * width * 3 + x * 3 + 1] = neonPixels[x, y].G * (maskPixels[x, y].G) / 255;
+                            Bumped[y * width * 3 + x * 3 + 2] = neonPixels[x, y].B * (maskPixels[x, y].B) / 255;
+
+                            Neon.SetPixel(x, y, neonPixels[x, y]);
+                            Mask.SetPixel(x, y, maskPixels[x, y]);
+                        }
+
+                        if (!lockInterface && progress++ % batchSize == 0)
+                        {
+                            int currentProgress = (int)((double)progress / todo * 100);
+                            if (currentProgress != lastProgress)
                             {
-                                neonPixels[x, y] = CppNeonPx(cleared[x, y], neonIntensity, hueRotate);
-                                maskPixels[x, y] = CppMaskPx(cleared[x, y], blurPixels[x, y], maskIntensity);
-
-                                Toned[y * width * 3 + x * 3] = cleared[x, y].R * (255 - maskPixels[x, y].R) / 255;
-                                Toned[y * width * 3 + x * 3 + 1] = cleared[x, y].G * (255 - maskPixels[x, y].G) / 255;
-                                Toned[y * width * 3 + x * 3 + 2] = cleared[x, y].B * (255 - maskPixels[x, y].B) / 255;
-
-                                Bumped[y * width * 3 + x * 3] = neonPixels[x, y].R * (maskPixels[x, y].R) / 255;
-                                Bumped[y * width * 3 + x * 3 + 1] = neonPixels[x, y].G * (maskPixels[x, y].G) / 255;
-                                Bumped[y * width * 3 + x * 3 + 2] = neonPixels[x, y].B * (maskPixels[x, y].B) / 255;
-
-                                Neon.SetPixel(x, y, neonPixels[x, y]);
-                                Mask.SetPixel(x, y, maskPixels[x, y]);
-                            }
-
-                            if (!lockInterface && progress++ % batchSize == 0)
-                            {
-                                int currentProgress = (int)((double)progress / todo * 100);
-                                if (currentProgress != lastProgress)
-                                {
-                                    lastProgress = currentProgress;
-                                    UpdateProgressBar("Refreshing the Image", (double)progress / todo);
-                                }
+                                lastProgress = currentProgress;
+                                UpdateProgressBar("Refreshing the Image", (double)progress / todo);
                             }
                         }
-                    });
-                });
+                    }
+                }
 
                 await Task.Run(() =>
                 {
-                    AsmAdd(ref Toned, ref Bumped, ref Final);
-                    /*
+                    /*AsmAdd(Toned, Bumped, Final, width * height * 3);
+                    
                     Parallel.For(0, width * height * 3, new ParallelOptions { MaxDegreeOfParallelism = cores }, i =>
                     {
                         Final[i] = Toned[i] + Bumped[i];
                     });
                     */
                 });
-                await Task.Run(() =>
+
+                for (int x = 0; x < width; x++)
                 {
-                    Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                    for (int y = 0; y < height; y++)
                     {
-                        for (int y = 0; y < height; y++)
+                        lock (lockObject)
                         {
-                            lock (lockObject)
-                            {
-                                OutputPicture.SetPixel(x, y, Color.FromArgb(
-                                Final[y * width * 3 + x * 3],
-                                Final[y * width * 3 + x * 3 + 1],
-                                Final[y * width * 3 + x * 3 + 2]
-                                ));
-                            }
-                            /*                        if (!lockInterface && progress++ % batchSize == 0)
-                                                    {
-                                                        int currentProgress = (int)((double)progress / todo * 100);
-                                                        if (currentProgress != lastProgress)
-                                                        {
-                                                            lastProgress = currentProgress;
-                                                            UpdateProgressBar("Rendering from Asembly", (double)progress / todo);
-                                                        }
-                                                    }*/
+                            OutputPicture.SetPixel(x, y, Color.FromArgb(
+                            Final[y * width * 3 + x * 3],
+                            Final[y * width * 3 + x * 3 + 1],
+                            Final[y * width * 3 + x * 3 + 2]
+                            ));
                         }
-                    });
-                });
+                    }
+                }
 
                 return OutputPicture;
             }
