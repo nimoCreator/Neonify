@@ -598,10 +598,9 @@ namespace JA_Neon
 
                 progress = 0;
                 
-                    Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
-                    {
-                        try
-                        {
+                    //Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                for(int x = 0; x < width; x++)    
+                {
                             for (int y = 0; y < height; y++)
                             {
                                 lock (lockObject)
@@ -633,12 +632,8 @@ namespace JA_Neon
                                     }
                                 }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console_AddLine(ex.Message);
-                        }
-                });
+                        
+                };
 
 
                 AsmAdd(ref Toned, ref Bumped, ref Final);
@@ -650,7 +645,8 @@ namespace JA_Neon
                 
                     // Finaltask.Wait();  
 
-                    Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                    // Parallel.For(0, width, new ParallelOptions { MaxDegreeOfParallelism = cores }, x =>
+                    for(int x = 0; x < width; x++)
                     {
                         for (int y = 0; y < height; y++)
                         {
@@ -674,7 +670,7 @@ namespace JA_Neon
                             }
                             
                         }
-                    });
+                    };
 
 
                 QuickRunAviable = true;
