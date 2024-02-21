@@ -14,15 +14,15 @@ AsmAdd proc
     mov rax, r8
     mov rbx, r9
 
-    xor r10d, r10d ; <- i = 0
+    xor r10, r10 ; <- i = 0
 
  AsmAdd_loop:
-    movups xmm0, [rsi + r10d * 4]
-    movups xmm1, [rdi + r10d * 4]
+    movups xmm0, [rsi + r10 * 4]
+    movups xmm1, [rdi + r10 * 4]
     addps xmm0, xmm1
-    movups [rax + r10d * 4], xmm0
-    inc r10d
-    cmp r10d, rbx
+    movups [rax + r10 * 4], xmm0
+    inc r10
+    cmp r10, rbx
     jl AsmAdd_loop
 
     pop rbp

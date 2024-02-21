@@ -1,6 +1,1 @@
-﻿  Assembling JANeonLib.asm...
-JANeonLib.asm(20): error A2082: cannot mix 16- and 32-bit registers
-JANeonLib.asm(21): error A2082: cannot mix 16- and 32-bit registers
-JANeonLib.asm(23): error A2082: cannot mix 16- and 32-bit registers
-JANeonLib.asm(25): error A2022: instruction operands must be the same size
-P:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\BuildCustomizations\masm.targets(70,5): error MSB3721: The command "ml64.exe /c /nologo /Zi /Fo"x64\Release\JANeonLib.obj" /W3 /errorReport:prompt  /TaJANeonLib.asm" exited with code 1.
+﻿  JANeonLib.vcxproj -> C:\Neon\x64\Release\JANeonLib.dll
